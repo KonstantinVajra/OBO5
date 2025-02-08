@@ -15,6 +15,7 @@ pygame.display.set_caption("Car Survival Game")
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 
 # Настройки игрока
 PLAYER_WIDTH = 50
@@ -40,15 +41,26 @@ except FileNotFoundError:
 player_image = pygame.transform.scale(player_image, (PLAYER_WIDTH, PLAYER_HEIGHT))
 enemy_image = pygame.transform.scale(enemy_image, (CAR_WIDTH, CAR_HEIGHT))
 
-# Загрузка музыки
+# Загрузка фоновой музыки
 try:
     pygame.mixer.music.load("sigma_bojj.mp3")  # Фоновая музыка
     pygame.mixer.music.set_volume(0.5)  # Установите громкость (от 0.0 до 1.0)
     pygame.mixer.music.play(-1)  # Воспроизведение музыки в цикле
-    print("Музыка успешно загружена и воспроизводится.")
+    print("Фоновая музыка успешно загружена и воспроизводится.")
 except pygame.error as e:
-    print(f"Ошибка при загрузке музыки: {e}")
+    print(f"Ошибка при загрузке фоновой музыки: {e}")
     print("Убедитесь, что файл sigma_bojj.mp3 находится в текущей рабочей директории.")
+
+# Загрузка звука машины (закольцованный фоновый звук)
+try:
+    car_sound = pygame.mixer.Sound("gaz_car.wav")  # Звук машины
+    car_sound.set_volume(0.2)  # Установите низкую громкость (например, 0.2)
+    car_sound.play(-1)  # Воспроизведение звука в цикле
+    print("Звук машины успешно загружен и воспроизводится.")
+except pygame.error as e:
+    print(f"Ошибка при загрузке звука машины: {e}")
+    print("Убедитесь, что файл gaz_car.wav находится в текущей рабочей директории.")
+    car_sound = None  # Если звук не загружен, установите его в None
 
 # Загрузка звуковых эффектов
 try:
@@ -97,16 +109,6 @@ class Car:
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
 
-# Функция для отображения текста "FINISH!!!!!"
-def show_finish_screen():
-    WIN.fill(BLACK)  # Черный фон
-    font = pygame.font.SysFont(None, 100)  # Шрифт для текста
-    text = font.render("FINISH!!!!!", True, WHITE)  # Текст "FINISH!!!!!"
-    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Центрирование текста
-    WIN.blit(text, text_rect)  # Отображение текста
-    pygame.display.update()  # Обновление экрана
-    pygame.time.delay(3000)  # Задержка перед завершением (3 секунды)
-
 # Основная функция игры
 def main():
     clock = pygame.time.Clock()
@@ -144,9 +146,16 @@ def main():
             if player.get_rect().colliderect(car.get_rect()):
                 if crash_sound:  # Если звук загружен
                     crash_sound.play()  # Воспроизведение звука столкновения
-                running = False  # Остановка игры
-                show_finish_screen()  # Показать экран "FINISH!!!!!"
-                break  # Выйти из цикла
+
+                # Черный экран и надпись
+                WIN.fill(BLACK)  # Черный экран
+                font = pygame.font.SysFont(None, 74)
+                text = font.render("НУ ты попал!!!!!", True, RED)
+                WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
+                pygame.display.update()
+
+                pygame.time.delay(3000)  # Пауза 3 секунды
+                running = False  # Завершение игры
 
         # Удаление автомобилей, которые уехали за экран
         cars = [car for car in cars if car.y < HEIGHT]
@@ -161,6 +170,10 @@ def main():
         WIN.blit(score_text, (10, 10))
 
         pygame.display.update()
+
+    # Остановка звука машины при завершении игры
+    if car_sound:
+        car_sound.stop()
 
     pygame.quit()
 
