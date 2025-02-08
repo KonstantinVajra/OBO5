@@ -97,6 +97,16 @@ class Car:
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
 
+# Функция для отображения текста "FINISH!!!!!"
+def show_finish_screen():
+    WIN.fill(BLACK)  # Черный фон
+    font = pygame.font.SysFont(None, 100)  # Шрифт для текста
+    text = font.render("FINISH!!!!!", True, WHITE)  # Текст "FINISH!!!!!"
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))  # Центрирование текста
+    WIN.blit(text, text_rect)  # Отображение текста
+    pygame.display.update()  # Обновление экрана
+    pygame.time.delay(3000)  # Задержка перед завершением (3 секунды)
+
 # Основная функция игры
 def main():
     clock = pygame.time.Clock()
@@ -134,8 +144,9 @@ def main():
             if player.get_rect().colliderect(car.get_rect()):
                 if crash_sound:  # Если звук загружен
                     crash_sound.play()  # Воспроизведение звука столкновения
-                    pygame.time.delay(1000)  # Пауза для воспроизведения звука
-                running = False
+                running = False  # Остановка игры
+                show_finish_screen()  # Показать экран "FINISH!!!!!"
+                break  # Выйти из цикла
 
         # Удаление автомобилей, которые уехали за экран
         cars = [car for car in cars if car.y < HEIGHT]
